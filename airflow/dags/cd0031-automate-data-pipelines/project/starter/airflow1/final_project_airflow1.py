@@ -16,6 +16,9 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
     'retries': 3,
     'email_on_retry': False,
+    'depends_on_past': True,
+    'start_date': pendulum.now(),
+    'catchup': False,
     }
 
 # dag = DAG('final_project_legacy',
@@ -26,10 +29,8 @@ default_args = {
 
 @dag(
           default_args=default_args,
-          start_date=pendulum.now(),
           description='Load and transform data in Redshift with Airflow',
-          schedule_interval='0 * * * *',
-          catchup=False,
+          schedule_interval='@hourly',
           max_active_runs=1,
 )
 def sparkify_data_pipeline():
@@ -102,7 +103,9 @@ def sparkify_data_pipeline():
         load_data_query=f"""
             INSERT INTO songplays (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent) 
             {sql_queries.songplay_table_insert}
-        """
+        """,
+        table='songplays',
+        truncate_table=False
     )
 
     load_user_dimension_table = LoadDimensionOperator(
@@ -150,7 +153,7 @@ def sparkify_data_pipeline():
             INSERT INTO artists (artist_id, artist_name, artist_location, artist_latitude, artist_longitude) 
             {sql_queries.artist_table_insert}
         """,
-        table='songs',
+        table='artists',
         create_table_query="""
             CREATE TABLE IF NOT EXISTS artists (
                 artist_id VARCHAR,
@@ -186,6 +189,7 @@ def sparkify_data_pipeline():
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
         redshift_conn_id="redshift",
+        tables_pk_check={'songs': 'song_id', 'artists': 'artist_id', 'users': 'userid', 'times': 'start_time'},
     )
 
     finish_operator = DummyOperator(

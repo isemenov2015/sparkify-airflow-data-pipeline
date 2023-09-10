@@ -24,20 +24,28 @@ class LoadFactOperator(BaseOperator):
     def __init__(self,
                  redshift_conn_id="",
                  load_data_query="",
+                 table="",
+                 truncate_table=False,
                  *args, **kwargs):
 
         super(LoadFactOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
         self.load_data_query = load_data_query
+        self.table = table
+        self.truncate_table = truncate_table
 
     def execute(self, context):
         self.log.info('Connecting to Redshift')
         self.log.info(f'Redshift credentials: {self.redshift_conn_id}')
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
-        self.log.info('Attempting to create songplays fact table')
+        self.log.info(f'Attempting to create {self.table} fact table')
         redshift.run(LoadFactOperator.songplays_create_table)
 
-        self.log.info('Starting songplays fact load load pipeline')
+        if self.truncate_table:
+            self.log.info(f'Attempting to truncate {self.table} fact table')
+            redshift.run(f'TRUNCATE TABLE {self.table}')
+
+        self.log.info(f'Starting {self.table} load pipeline')
         redshift.run(self.load_data_query)
-        self.log.info('Songplays fact load pipeline complete')
+        self.log.info(f'{self.table} load pipeline complete')
