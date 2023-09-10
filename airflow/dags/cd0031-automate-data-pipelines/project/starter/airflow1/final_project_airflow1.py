@@ -48,6 +48,7 @@ def sparkify_data_pipeline():
         aws_credentials_id="aws_credentials",
         s3_bucket=Variable.get('s3_bucket'),
         s3_key='log-data',
+        s3_region='us-east-1',
         create_table_query="""
                 CREATE TABLE IF NOT EXISTS staging_events (
                     artist TEXT,
@@ -80,6 +81,7 @@ def sparkify_data_pipeline():
         aws_credentials_id="aws_credentials",
         s3_bucket=Variable.get('s3_bucket'),
         s3_key='song-data',
+        s3_region='us-east-1',
         create_table_query="""
                 CREATE TABLE IF NOT EXISTS staging_songs (
                     num_songs INTEGER,

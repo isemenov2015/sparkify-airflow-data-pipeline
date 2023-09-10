@@ -11,6 +11,7 @@ class StageToRedshiftOperator(BaseOperator):
         FROM '{}'
         ACCESS_KEY_ID '{}'
         SECRET_ACCESS_KEY '{}'
+        REGION '{}'
         FORMAT AS JSON '{}'
         TIMEFORMAT AS 'epochmillisecs'
     """
@@ -24,6 +25,7 @@ class StageToRedshiftOperator(BaseOperator):
                  table="",
                  s3_bucket="",
                  s3_key="",
+                 s3_region='us-east-1',
                  create_table_query="",
                  json_format='auto',
                  *args, **kwargs):
@@ -34,6 +36,7 @@ class StageToRedshiftOperator(BaseOperator):
         self.table = table
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
+        self.s3_region = s3_region
         self.create_table_query = create_table_query
         self.json_format = json_format
 
@@ -62,7 +65,8 @@ class StageToRedshiftOperator(BaseOperator):
             s3_path,
             credentials.access_key,
             credentials.secret_key,
-            self.json_format
+            self.s3_region,
+            self.json_format,
         )
         redshift.run(formatted_sql)
 

@@ -43,6 +43,7 @@ def final_project():
         aws_credentials_id="aws_credentials",
         s3_bucket=Variable.get('s3_bucket'),
         s3_key='log-data',
+        s3_region='us-east-1',
         create_table_query="""
                 CREATE TABLE IF NOT EXISTS staging_events (
                     artist TEXT,
@@ -75,6 +76,7 @@ def final_project():
         aws_credentials_id="aws_credentials",
         s3_bucket=Variable.get('s3_bucket'),
         s3_key='song-data',
+        s3_region='us-east-1',
         create_table_query="""
                 CREATE TABLE IF NOT EXISTS staging_songs (
                     num_songs INTEGER,
@@ -100,7 +102,7 @@ def final_project():
             {sql_queries.songplay_table_insert}
         """,
         table='songplays',
-        truncate_table=False
+        truncate_table=False,
     )
 
     load_user_dimension_table = LoadDimensionOperator(

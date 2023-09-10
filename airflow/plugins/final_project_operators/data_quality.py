@@ -19,7 +19,6 @@ class DataQualityOperator(BaseOperator):
 
 
     def execute(self, context):
-        self.log.info('DataQualityOperator not implemented yet')
         self.log.info('Connecting to Redshift')
         self.log.info(f'Redshift credentials: {self.redshift_conn_id}')
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)

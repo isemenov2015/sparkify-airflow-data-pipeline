@@ -12,6 +12,7 @@ class LoadDimensionOperator(BaseOperator):
                  load_data_query="",
                  table="",
                  create_table_query="",
+                 truncate_table=True,
                  *args, **kwargs):
         
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
@@ -19,6 +20,7 @@ class LoadDimensionOperator(BaseOperator):
         self.load_data_query = load_data_query
         self.table = table
         self.create_table_query = create_table_query
+        self.truncate_table = truncate_table
 
     def execute(self, context):
         self.log.info('Connecting to Redshift')
@@ -28,8 +30,9 @@ class LoadDimensionOperator(BaseOperator):
         self.log.info(f'Attempting to create dimension table {self.table}')
         redshift.run(self.create_table_query)
 
-        self.log.info(f'Truncating dimension table {self.table}')
-        redshift.run(f'TRUNCATE TABLE {self.table}')
+        if self.truncate_table:
+            self.log.info(f'Truncating dimension table {self.table}')
+            redshift.run(f'TRUNCATE TABLE {self.table}')
 
         self.log.info(f'Loading data to dimension table {self.table}')
         redshift.run(self.load_data_query)
